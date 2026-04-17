@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
 
@@ -20,21 +20,26 @@ class PostDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["commentary_form"] = CommentaryForm()
+        # Se o form já estiver no contexto (vindo do POST), não sobrescreve
+        if "commentary_form" not in context:
+            context["commentary_form"] = CommentaryForm()
         return context
 
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return self.get(request, *args, **kwargs)
-
         self.object = self.get_object()
         form = CommentaryForm(request.POST)
+
+        if not request.user.is_authenticated:
+            form.add_error(None, "You must be logged in to post a comment.")
+            return self.render_to_response(self.get_context_data(commentary_form=form))
+
         if form.is_valid():
             commentary = form.save(commit=False)
             commentary.user = request.user
             commentary.post = self.object
             commentary.save()
-            return generic.edit.HttpResponseRedirect(
+            return HttpResponseRedirect(
                 reverse("blog:post-detail", kwargs={"pk": self.object.pk})
             )
-        return self.get(request, *args, **kwargs)
+        
+        return self.render_to_response(self.get_context_data(commentary_form=form))

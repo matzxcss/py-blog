@@ -1,8 +1,13 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 
-# Register your models here.
-from .models import Commentary, Post
+from .models import Commentary, Post, User
+
+
+@admin.register(User)
+class UserAdmin(UserAdmin):
+    pass
 
 
 @admin.register(Post)
@@ -15,7 +20,7 @@ class PostAdmin(admin.ModelAdmin):
 @admin.register(Commentary)
 class CommentaryAdmin(admin.ModelAdmin):
     list_display = ("user", "post", "created_time")
-    search_fields = ("user", "post__title")
+    search_fields = ("user__username", "post__title")
     list_filter = ("created_time",)
 
 

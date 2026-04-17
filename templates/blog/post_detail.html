@@ -31,7 +31,6 @@
             <form method="post">
                 {% csrf_token %}
                 {{ commentary_form|crispy }}
-                <button type="submit" class="btn btn-primary">Post Comment</button>
             </form>
         {% else %}
             <p><a href="{% url 'admin:index' %}">Login</a> to leave a comment.</p>
