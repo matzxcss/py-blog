@@ -20,7 +20,6 @@ class PostDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Se o form já estiver no contexto (vindo do POST), não sobrescreve
         if "commentary_form" not in context:
             context["commentary_form"] = CommentaryForm()
         return context
@@ -31,7 +30,9 @@ class PostDetailView(generic.DetailView):
 
         if not request.user.is_authenticated:
             form.add_error(None, "You must be logged in to post a comment.")
-            return self.render_to_response(self.get_context_data(commentary_form=form))
+            return self.render_to_response(
+                self.get_context_data(commentary_form=form)
+            )
 
         if form.is_valid():
             commentary = form.save(commit=False)
@@ -41,5 +42,7 @@ class PostDetailView(generic.DetailView):
             return HttpResponseRedirect(
                 reverse("blog:post-detail", kwargs={"pk": self.object.pk})
             )
-        
-        return self.render_to_response(self.get_context_data(commentary_form=form))
+
+        return self.render_to_response(
+            self.get_context_data(commentary_form=form)
+        )
